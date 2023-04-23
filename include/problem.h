@@ -10,8 +10,8 @@ template <typename T>
 class Problem {
  private:
   typedef vector<vector<T>> Cluster;
-  int m_; // number of points
-  int n_; // number of coordinates on the point
+  int m_; // n. number of points
+  int n_; // K. number of coordinates on the point
   vector<vector<T>> points_; // Set of points that can be any type
 
  public:
@@ -26,9 +26,9 @@ class Problem {
     if (file.is_open()) {
       string line;
       getline(file, line);
-      m_ = stoi(line);
+      m_ = stoi(line); // Number of elements. n
       getline(file, line);
-      n_ = stoi(line);
+      n_ = stoi(line); // Dimension of the elements. k
       while (getline(file, line)) {
         vector<T> point;
         stringstream ss(line);
