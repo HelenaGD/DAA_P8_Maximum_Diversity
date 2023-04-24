@@ -44,10 +44,15 @@ int main(int argc, char** argv) {
   // Escribir encabezado
   //archivo << "Problema,n,K,m,z,S,CPU" << endl;
 
-  // GRASP
-  ofstream archivo2("solutions/grasp.csv");
+  // Búsqueda local
+  ofstream archivo3("solutions/local.csv");
   // Escribir encabezado
-  archivo2 << "Problema,n,K,m,Iter,|LRC|,z,S,CPU" << endl;
+  archivo3 << "Problema,n,K,m,z,S,CPU" << endl;
+
+  // GRASP
+  //ofstream archivo2("solutions/grasp.csv");
+  // Escribir encabezado
+  //archivo2 << "Problema,n,K,m,Iter,|LRC|,z,S,CPU" << endl;
 
   for (const auto& entry : fs::directory_iterator(directory_path)) {
     if (entry.is_regular_file()) {
@@ -60,10 +65,15 @@ int main(int argc, char** argv) {
       GENERATOR generator;
 
       // Para cada archivo de las instancias. Hago las iteraciones correspondientes
+      // Voraz
       //generator.generate(nombre_archivo, archivo, problem, 1, 4);
-      generator.generate(nombre_archivo, archivo2, problem, 2, 4);
+      // Búsqueda local
+      generator.generate(nombre_archivo, archivo3, problem, 3, 4);
+      // GRASP
+      //generator.generate(nombre_archivo, archivo2, problem, 2, 4);
     }  
   }
   //archivo.close();
-  archivo2.close();
+  //archivo2.close();
+  archivo3.close();
 }
