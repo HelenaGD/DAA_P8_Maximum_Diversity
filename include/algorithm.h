@@ -135,15 +135,14 @@ class Algorithm {
     Cluster dummy;
     // Ahora debo intercambiar los puntos de servicio por alguno de los puntos del entorno
 
-    /////////////////////
-    cout << "Solucion inicial para el intercambio: " << endl;
+    /*cout << "Solucion inicial para el intercambio: " << endl;
     for (int i = 0; i < initial_solution.size(); i++) {
       cout << "Cluster " << i << ": ";
       for (int j = 0; j < initial_solution[i].size(); j++) {
         cout << initial_solution[i][j] << " ";
       }
       cout << endl;
-    }
+    }*/
     for (int i = 0; i < initial_solution.size(); i++) {
       for (int j = 0; j < vecindario.size(); j++) {
         // Si el punto es uno de los clusteres, no lo añado
