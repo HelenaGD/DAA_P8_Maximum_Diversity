@@ -20,10 +20,24 @@ class Solution {
     sse_ = 0;
   }
 
-  double get_sse() const { return sse_; }
+  double get_z() const { return sse_; }
   int get_num_puntos() { return service_points_.size(); }
+  int get_k() { return service_points_[0].size(); }
 
   Cluster get_service_points() const { return service_points_; }
+
+  void evaluate() {
+    sse_ = 0;
+    // Primero itero sobre los puntos de servicio
+    //cout << "El numero de puntos de servicio es: " << service_points_.size() << endl;
+    for (int i = 0; i < service_points_.size(); i++) {
+      for (int j = i + 1; j < service_points_.size(); j++) {
+        // Calculo la distancia euclidea entre el punto de servicio y el punto
+        sse_ += euclidean_distance(service_points_[i], service_points_[j]);
+      }
+      //cout << "Punto evaluado" << endl;
+    }
+  }
 
   void store_solution(const string& filename = "solution.txt") {
     string path = "solutions/" + filename;
