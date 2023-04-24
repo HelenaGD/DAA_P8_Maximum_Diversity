@@ -14,6 +14,15 @@ class GENERATOR {
   GENERATOR() {};
   ~GENERATOR() {};
   
+  /**
+   * @brief Genera un archivo con los resultados de las ejecuciones de un algoritmo
+   * @param name Nombre del problema
+   * @param archivo Archivo donde se escribirán los resultados
+   * @param problem Problema a resolver
+   * @param type Tipo de algoritmo a ejecutar (1: Voraz, 2: GRASP, 3: Búsqueda local)
+   * @param num_executions Número de ejecuciones a realizar
+   * @return void
+  */
   void generate(const string& name, ofstream& archivo, Problem<double> problem, const int& type, const int& num_executions = 10) {
     // Obtener el tiempo actual
     time_t seed = time(NULL);
@@ -28,10 +37,16 @@ class GENERATOR {
       srand(seed + i);
       Solution<double> solution;
 
-      if (type == 1) { // Voraz
+      if (type == 1 || type == 3) { // Voraz o búsqueda local
         t0 = clock();
-        solution = algorithm.constructivo_voraz(problem, m, 1);
-        solution.evaluate();
+        switch (type) {
+          case 1:
+            solution = algorithm.constructivo_voraz(problem, m, 1);
+            break;
+          case 3:
+            solution = algorithm.run_local_search(problem, m);
+            break;
+        }
         t1 = clock();
 
         double time = (double(t1-t0)/CLOCKS_PER_SEC);
@@ -53,10 +68,19 @@ class GENERATOR {
       }
       m++; // Aumentar el número de puntos en la solución
     }
-    if (type == 1) guardar_voraz_csv(archivo, iteraciones);
+    if (type == 1 || type == 3) guardar_voraz_csv(archivo, iteraciones);
     //else if (type == 2) guardar_grasp_csv(archivo, iteraciones);
   }
 
+  /**
+   * Realiza las iteraciones correspondientes para la tabla de GRASP
+   * @param m Número de puntos en la solución
+   * @param algorithm Algoritmo a ejecutar
+   * @param problem Problema a resolver
+   * @param archivo Archivo donde se escribirán los resultados
+   * @param name Nombre del problema
+   * @return void
+  */
   void iterar_grasp(const int& m, Algorithm<double> algorithm, const Problem<double>& problem, ofstream& archivo, const string& name) {
     // Llega con la m fijada
     // Para cada m debo
@@ -76,6 +100,16 @@ class GENERATOR {
     }
   }
 
+  /**
+   * Retorna la mejor iteracion de entre las generadas para grasp
+   * @param m Número de puntos en la solución
+   * @param lrc_size Tamaño de la lista de candidatos
+   * @param num_Iter Número de iteraciones a realizar
+   * @param algorithm Algoritmo a ejecutar
+   * @param problem Problema a resolver
+   * @param name Nombre del problema
+   * @return Iteracion Mejor iteracion
+  */
   Iteracion generar_mejor_iteracion (const int& m, const int& lrc_size, const int& num_Iter, Algorithm<double> algorithm, const Problem<double>& problem, const string& name) {
     vector<Iteracion> iteraciones;
     Solution<double> solution;
@@ -109,6 +143,12 @@ class GENERATOR {
     return iteraciones[0];
   }
 
+  /**
+   * Guarda los resultados de la ejecución de GRASP en un archivo CSV
+   * @param archivo Archivo donde se escribirán los resultados
+   * @param iteracion Iteracion a guardar
+   * @return void
+  */
   void guardar_grasp_csv(ofstream& archivo, const Iteracion& iteracion) {
     // Escribir cada fila
       archivo << iteracion.Identificador_ << ","
@@ -122,6 +162,13 @@ class GENERATOR {
               << iteracion.tiempo_ << endl;
   }
 
+  /**
+   * Guarda los resultados de la ejecución del algoritmo voraz
+   * y de la búsqueda local en un archivo CSV
+   * @param archivo Archivo donde se escribirán los resultados
+   * @param iteraciones Iteraciones a guardar
+   * @return void
+  */
   void guardar_voraz_csv(ofstream& archivo, const vector<Iteracion>& iteraciones) {
     // Escribir cada fila
     for (auto iteracion : iteraciones) {
@@ -135,6 +182,11 @@ class GENERATOR {
     }
   }
 
+  /**
+   * Convierte un vector de vectores de doubles a string
+   * @param vector Vector a convertir
+   * @return string Vector convertido
+  */
   string to_string_solution(vector<vector<double>> vector) {
     string solution = "";
     for (int i = 0; i < vector.size(); i++) {
