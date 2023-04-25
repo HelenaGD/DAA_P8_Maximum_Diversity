@@ -60,7 +60,7 @@ class GENERATOR {
         iteracion.solution_ = solution.get_service_points();
         iteracion.tiempo_ = time;
         iteraciones.push_back(iteracion);
-        sleep(1);
+        sleep(0.2);
       } else if (type == 2) iterar_grasp(m, algorithm, problem, archivo, name);
       else {
         cout << "Error: Tipo de algoritmo no válido" << endl;
@@ -86,11 +86,12 @@ class GENERATOR {
     // Para cada m debo
     // Hacer x ejecuciones con 2 y 3 de tamaño LRC
     int num_Iter = 10; // 10 y 20
+    //cout << "Problema: " << name << endl;
     while (num_Iter <= 20) {
-      cout << "Iteraciones: " << num_Iter << endl;
+      //cout << "Iteraciones: " << num_Iter << endl;
       int lrc_size = 2; // 2 y 3
       while (lrc_size <= 3) {
-        cout << "LRC: " << lrc_size << endl;
+        //cout << "LRC: " << lrc_size << endl;
         Iteracion mejor_iteracion = generar_mejor_iteracion(m, lrc_size, num_Iter, algorithm, problem, name);
         // Guardar sólo la mejor iteracion
         guardar_grasp_csv(archivo, mejor_iteracion);
@@ -116,11 +117,12 @@ class GENERATOR {
 
     unsigned t0, t1;
     for (int i = 0; i < num_Iter; i++) {
-      cout << "Iteracion: " << i + 1 << endl;
+      //cout << "Iteracion: " << i + 1 << endl;
       Iteracion iteracion;
       // Ejecutar el algoritmo
       t0 = clock();
-      solution = algorithm.constructivo_voraz(problem, m, lrc_size);
+      //solution = algorithm.constructivo_voraz(problem, m, lrc_size);
+      solution = algorithm.run_local_search(problem, m, lrc_size);
       solution.evaluate();
       t1 = clock();
       double time = (double(t1-t0)/CLOCKS_PER_SEC);
@@ -132,11 +134,12 @@ class GENERATOR {
       iteracion.ejecuciones_ = i + 1;
       iteracion.lrc_size_ = lrc_size;
       iteracion.num_Iter_ = num_Iter;
+      iteracion.z_constructivo_ = solution.get_z_constructivo();
       iteracion.z_ = solution.get_z();
       iteracion.solution_ = solution.get_service_points();
       iteracion.tiempo_ = time;
       iteraciones.push_back(iteracion);
-      sleep(1);
+      sleep(0.2);
     }
     // Guardar la mejor solución
     std::sort(iteraciones.begin(), iteraciones.end(), [](Iteracion a, Iteracion b) { return a.z_ > b.z_; });
@@ -157,6 +160,7 @@ class GENERATOR {
               << iteracion.m_ << ","
               << iteracion.num_Iter_ << ","
               << iteracion.lrc_size_ << ","
+              << iteracion.z_constructivo_ << ","
               << iteracion.z_ << ","
               << to_string_solution(iteracion.solution_) << ","
               << iteracion.tiempo_ << endl;

@@ -13,6 +13,7 @@ struct Iteracion {
   int ejecuciones_;
   int lrc_size_;
   int num_Iter_;
+  double z_constructivo_;
   double z_;
   vector<vector<double>> solution_;
   double tiempo_;

@@ -10,6 +10,7 @@ class Solution {
   typedef vector<vector<T>> Cluster;
   double sse_;
   Cluster service_points_;
+  double sse_constructivo_;
  public:
   Solution() {
     sse_ = 0;
@@ -18,9 +19,15 @@ class Solution {
   Solution(Cluster service_points) {
     service_points_ = service_points;
     sse_ = 0;
+    sse_constructivo_ = 0;
+  }
+
+  void set_sse_constructivo(double sse_constructivo) {
+    sse_constructivo_ = sse_constructivo;
   }
 
   double get_z() const { return sse_; }
+  double get_z_constructivo() const { return sse_constructivo_; }
   int get_num_puntos() { return service_points_.size(); }
   int get_k() { return service_points_[0].size(); }
 
@@ -36,6 +43,26 @@ class Solution {
         sse_ += euclidean_distance(service_points_[i], service_points_[j]);
       }
       //cout << "Punto evaluado" << endl;
+    }
+  }
+
+  void reduced_evaluate(const double& old_sse, const Cluster& old_service_points) {
+    sse_ = old_sse;
+    // solucion actual
+    Cluster new_service_points = get_service_points();
+    // Trabajo sobre una solución sse_ ya calculada
+
+    // Miro qué puntos han cambiado
+    for (int i = 0; i < new_service_points.size(); i++) {
+      for (int j = 0; j < new_service_points.size(); j++) {
+        // Si el punto de servicio es el mismo, no hago nada
+        if (new_service_points[i][j] == old_service_points[i][j]) {
+          continue;
+        }
+        // Si no, calculo la distancia euclidea entre el punto de servicio y el punto
+        sse_ += euclidean_distance(new_service_points[i], old_service_points[i]);
+        sse_ -= euclidean_distance(new_service_points[i], new_service_points[j]);
+      }
     }
   }
 
@@ -62,6 +89,7 @@ class Solution {
     if (this != &other) {
       sse_ = other.sse_;
       service_points_ = other.service_points_;
+      sse_constructivo_ = other.sse_constructivo_;
     }
     return *this;
   }

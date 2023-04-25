@@ -23,13 +23,15 @@ class Algorithm {
    * @param m Número de puntos de servicio
    * @return Solución óptima
   */
-  Solution<T> run_local_search(Problem<T> problem, int m = 2) {
+  Solution<T> run_local_search(Problem<T> problem, const int& m = 2, const int& lrc_size = 1) {
     // Fase constructiva inicial
-    Solution<T> solution = constructivo_voraz(problem, m, 1);
+    Solution<T> solution = constructivo_voraz(problem, m, lrc_size);
+    double sse_constructivo = solution.get_z();
 
     // BÚSQUEDA LOCAL
     //cout << endl << "Inicia búsqueda local" << endl;
     Solution<T> optimo_local = local_search(problem, solution, 0);
+    optimo_local.set_sse_constructivo(sse_constructivo);
     //cout << "Finaliza búsqueda local" << endl << endl;
 
     // Retorno la solución
