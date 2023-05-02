@@ -46,23 +46,42 @@ class Solution {
     }
   }
 
-  void reduced_evaluate(const double& old_sse, const Cluster& old_service_points) {
-    sse_ = old_sse;
-    // solucion actual
-    Cluster new_service_points = get_service_points();
-    // Trabajo sobre una solución sse_ ya calculada
-
-    // Miro qué puntos han cambiado
-    for (int i = 0; i < new_service_points.size(); i++) {
-      for (int j = 0; j < new_service_points.size(); j++) {
-        // Si el punto de servicio es el mismo, no hago nada
-        if (new_service_points[i][j] == old_service_points[i][j]) {
-          continue;
-        }
-        // Si no, calculo la distancia euclidea entre el punto de servicio y el punto
-        sse_ += euclidean_distance(new_service_points[i], old_service_points[i]);
-        sse_ -= euclidean_distance(new_service_points[i], new_service_points[j]);
+  void parcial_evaluate(const double& old_sse, const Cluster& old_service_points) {
+    /*cout << "Puntos antiguos: " << endl;
+    for (int i = 0; i < old_service_points.size(); i++) {
+      for (int j = 0; j < old_service_points[i].size(); j++) {
+        cout << old_service_points[i][j] << " ";
       }
+      cout << endl;
+    }
+
+    cout << "Puntos nuevos: " << endl;
+    for (int i = 0; i < service_points_.size(); i++) {
+      for (int j = 0; j < service_points_[i].size(); j++) {
+        cout << service_points_[i][j] << " ";
+      }
+      cout << endl;
+    }*/
+
+    // Busco en qué posición difieren los vectores de puntos
+    int pos = -1;
+    for (int i = 0; i < old_service_points.size(); i++) {
+      if (old_service_points[i] != service_points_[i]) {
+        pos = i;
+        break;
+      }
+    }
+
+    //cout << "La posicion es: " << pos << endl;
+
+    // Trabajo sobre una solución sse_ ya calculada
+    sse_ = old_sse;
+    for (int i = 0; i < service_points_.size(); i++) {
+      if (i == pos) continue;
+      // Resto la distancia del antiguo
+      sse_ -= euclidean_distance(service_points_[i], old_service_points[pos]);
+      // Sumo la distancia del nuevo
+      sse_ += euclidean_distance(service_points_[i], service_points_[pos]);
     }
   }
 

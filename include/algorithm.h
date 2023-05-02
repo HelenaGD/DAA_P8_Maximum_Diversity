@@ -64,11 +64,13 @@ class Algorithm {
         break;
       }
       best_solution = best_vecino(problem, best_serv_points, movimiento);
+      double old_z = best_z;
+      Cluster old_points = best_serv_points;
       best_serv_points = best_solution.get_service_points();
 
       // Evaluación
       Solution<T> new_solution(best_serv_points);
-      new_solution.evaluate();
+      new_solution.parcial_evaluate(old_z, old_points);
       double new_z = new_solution.get_z();
 
       /*cout << "Evaluación hecha" << endl;
