@@ -76,13 +76,17 @@ class Solution {
 
     // Trabajo sobre una solución sse_ ya calculada
     sse_ = old_sse;
+    //double comprobacion = old_sse;
     for (int i = 0; i < service_points_.size(); i++) {
       if (i == pos) continue;
       // Resto la distancia del antiguo
       sse_ -= euclidean_distance(service_points_[i], old_service_points[pos]);
+      //comprobacion -= euclidean_distance(service_points_[i], old_service_points[pos]);
       // Sumo la distancia del nuevo
       sse_ += euclidean_distance(service_points_[i], service_points_[pos]);
+      //comprobacion += euclidean_distance(service_points_[i], service_points_[pos]);
     }
+    //cout << "Parcial: " << comprobacion << endl;
   }
 
   void store_solution(const string& filename = "solution.txt") {

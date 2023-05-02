@@ -98,6 +98,10 @@ class Algorithm {
    * @return Mejor solución vecina
   */
   Solution<T> best_vecino(const Problem<T>& problem, const Cluster& initial_solution, const int& movimiento = 0) {
+    Solution<T> initial_solution_obj(initial_solution);
+    initial_solution_obj.evaluate();
+    double reference_z = initial_solution_obj.get_z();
+
     Solution<T> the_solution;
     // De todas las soluciones vecinas, encuentro la mejor
     // Genero espacio de soluciones vecinas
@@ -115,7 +119,8 @@ class Algorithm {
     for (int i = 0; i < vecinos.size(); i++) {
       // Evaluación (Total. Intentar parcial)
       Solution<T> new_solution(vecinos[i]);
-      new_solution.evaluate();
+      new_solution.parcial_evaluate(reference_z, initial_solution);
+      //new_solution.evaluate();
       double new_z = new_solution.get_z();
       if (new_z > best_z) { // Ahora maximizo
         best_solution = vecinos[i];
