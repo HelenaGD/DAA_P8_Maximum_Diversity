@@ -1,7 +1,11 @@
 #pragma once
-#include "../include/solution.h"
+#include "solution.h"
+#include "node.h"
+
 #include <limits>
 #include <algorithm>
+#include <tuple>
+#include <vector>
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
@@ -9,12 +13,159 @@
 
 template <typename T>
 class Algorithm {
+ private:
+  int numberOfNodes_;
+  std::vector<Node<Solution<T>>> activeNodes_;
+  int option_;
+
  public:
   typedef std::pair<int, T> farthestElement;
   typedef vector<vector<T>> Cluster;
   typedef vector<T> Punto;
-  Algorithm() {};
+
+  Algorithm() {
+    numberOfNodes_ = 0;
+    option_ = 0;
+  };
   ~Algorithm() {};
+
+  /**
+   * @brief Establece la opción con la que se debe ejecutar el algoritmo
+   * @param opcion Opción de algoritmo a ejecutar (0: SmallestZ, 1: Deeper)
+  */
+  void setOption(int option) {
+    option_ = option;
+  }
+
+  int getNumberOfNodes() const { return numberOfNodes_; }
+
+  bool sortByZ(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
+    return (node1.get_solution().get_z() < node2.get_solution().get_z());
+  }
+
+  bool sortByDepth(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
+    return (node1.get_depth() < node2.get_depth());
+  }
+
+  std::vector<Node<Solution<T>>> sortbyOption(vector<Node<Solution<T>>>& activeNodes) {
+    if (option_ == 0) { // SmallestZ
+      std::sort(activeNodes.begin(), activeNodes.end(), sortByZ);
+    } else { // Deeper
+      std::sort(activeNodes.begin(), activeNodes.end(), sortByDepth);
+    }
+    return activeNodes;
+  }
+
+  /**
+   * @brief Ejecuta el algoritmo para un problema dado
+   * @param problem Problema a resolver
+   * @param initial_solution Solución inicial
+   * @return Solución óptima
+  */
+  Solution<T> run_branch_and_bound(const Problem<T>& problem, const Solution<T>& initial_solution, const int& m = 2) {
+    // Tengo una solucion inicial que me llega de greedy o grasp
+    Solution<T> cota_inferior = initial_solution;
+    Node<Solution<T>> initial_node(cota_inferior, 0);
+
+    // Creo un conjunto de nodos activos a ser expandidos
+    activeNodes_.push_back(initial_node);
+    numberOfNodes_ = 1;
+    Node<Solution<T>> actual_Node = activeNodes_[0];
+
+    // Nodos activos a verificar por su límite superior y que podrían expandirse
+    while (activeNodes_.size() > 0) {
+      sortByOption(activeNodes_);
+      actual_Node = activeNodes_[activeNodes_.size() - 1];
+
+      // Expando el nodo actual
+      while (actual_Node.get_depth() < m) {
+        vector<Node<Solution<T>>> newNodes = generateLeaf(problem, cota_inferior, actual_Node.get_depth(), m);
+        typename vector<Node<Solution<T>>>::iterator activeNodes_it = std::find(activeNodes_.begin(), activeNodes_.end(), actual_Node);
+        activeNodes_.erase(activeNodes_it);
+        sortbyOption(newNodes);
+        for (int i = 0; i < newNodes.size(); i++) {
+          activeNodes_.push_back(newNodes[i]);
+          numberOfNodes_++;
+        }
+
+        // La mejor de las hojas
+        actual_Node = activeNodes_[activeNodes_.size() - 1];
+      }
+
+      // Calculo z
+      double actual_Node_z = actual_Node.get_solution().get_z(); // Revisar esto
+      if (actual_Node_z < cota_inferior.get_z()) {
+        cota_inferior = actual_Node.get_solution();
+      }
+
+      for (int i = 0; i < activeNodes_.size(); i++) {
+        if (activeNodes_[i].get_solution().get_z() <= cota_inferior.get_z()) {
+          typename vector<Node<Solution<T>>>::iterator activeNodes_it = std::find(activeNodes_.begin(), activeNodes_.end(), activeNodes_[i]);
+          activeNodes_.erase(activeNodes_it);
+          i--;
+        }
+      }
+    }
+    return cota_inferior;
+  }
+
+  /**
+   * Genera todas las hojas/hijos de un nodo padre, avanzando a travñes de cada una de sus
+   * ramas y, dependiendo de la profundidad, establece elementos para obtener todas las
+   * posibles combinaciones
+  */
+  std::vector<Node<Solution<T>>> generateLeaf(const Problem<T>& problem, const Solution<T>& parent, const int& depth, const int& m) {
+    std::vector<Node<Solution<T>>> children;
+    Solution<T> selectedElement;
+
+    
+    // Agrega a la posible solución los elementos correspondientes del padre debido a la profundidad actual.
+    for (int i = 0; i < depth; i++) {
+      selectedElement.add_element(parent[i]);
+    }
+
+    // Eliminar cada elemento de la solución generada que se encuentre dentro del conjunto inicial de elementos.
+    std::vector<vector<T>> initialX = problem.get_m();
+    for (int i = 0; i < selectedElement.size(); i++) {
+      typename Cluster::iterator initialXIterator = std::find(initialX.begin(), initialX.end(), selectedElement.get_service_points()[i]);
+      initialX.erase(initialXIterator);
+    }
+
+    // Establece un eje de coordenadas
+    selectedElement.resize(depth + 1);
+    for (int i = 0; i < initialX.size(); i++) {
+      selectedElement[depth] = initialX[i];
+      Cluster initialWithoutSelected = initialX;
+      initialWithoutSelected.erase(initialWithoutSelected.begin() + i);
+      Node<Solution<T>> newLeaf(generateBestSolution(initialWithoutSelected, selectedElement, m), depth + 1);
+      children.push_back(newLeaf);
+    }
+
+    return children;
+  }
+
+  Solution<T> generateBestSolution(const Cluster& initialX, const Solution<T>& selectedElement, const int& m) {
+    std::pair<vector<T>, double> bestCandidate; // Cada posición corresponde a un elemento y su valor de z
+    bestCandidate.second = 0.0;
+    Solution<T> auxSolution;
+    double candidate;
+
+    while(selectedElement.size() < m) {
+      for (int i = 0; i < initialX.size(); i++) {
+        auxSolution = selectedElement;
+        auxSolution.add_element(initialX[i]);
+        auxSolution.evaluate();
+        candidate = auxSolution.get_z(); // revisar
+        if (candidate > bestCandidate.second) {
+          bestCandidate.first = initialX[i];
+          bestCandidate.second = candidate;
+        }
+      }
+      selectedElement.add_element(bestCandidate.first);
+    }
+    selectedElement.evaluate();
+    return selectedElement;
+  }
 
   /**
    * Realiza la búsqueda local para un problema dado.

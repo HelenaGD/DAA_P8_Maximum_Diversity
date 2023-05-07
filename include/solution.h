@@ -33,6 +33,10 @@ class Solution {
 
   Cluster get_service_points() const { return service_points_; }
 
+  void add_element(vector<T> element) {
+    service_points_.push_back(element);
+  }
+
   void evaluate() {
     sse_ = 0;
     // Primero itero sobre los puntos de servicio
@@ -115,5 +119,12 @@ class Solution {
       sse_constructivo_ = other.sse_constructivo_;
     }
     return *this;
+  }
+
+  vector<T>& operator[](int index) {
+    if (index < 0 || index >= service_points_.size()) {
+      throw out_of_range("Index out of range");
+    }
+    return service_points_[index];
   }
 };
