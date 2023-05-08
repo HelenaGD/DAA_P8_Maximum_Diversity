@@ -22,6 +22,12 @@ class Solution {
     sse_constructivo_ = 0;
   }
 
+  Solution(Cluster service_points, double sse) {
+    service_points_ = service_points;
+    sse_ = sse;
+    sse_constructivo_ = 0;
+  }
+
   void set_sse_constructivo(double sse_constructivo) {
     sse_constructivo_ = sse_constructivo;
   }

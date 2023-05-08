@@ -54,10 +54,15 @@ int main(int argc, char** argv) {
   // Escribir encabezado
   //archivo2 << "Problema,n,K,m,Iter,|LRC|,z0,z,S,CPU" << endl;
 
-  // Branch and bound
-  ofstream archivo4("solutions/bb_greedy.csv");
+  // Branch and bound con voraz
+  //ofstream archivo4("solutions/bb_greedy.csv");
   // Escribir encabezado
-  archivo4 << "Problema,Estrategia,n,K,m,z,S,CPU,nodos_generados" << endl;
+  //archivo4 << "Problema,Estrategia,n,K,m,z,S,CPU,nodos_generados" << endl;
+
+  // Branch and bound con GRASP
+  ofstream archivo5("solutions/bb_grasp.csv");
+  // Escribir encabezado
+  archivo5 << "Problema,Estrategia,n,K,m,z,S,CPU,nodos_generados" << endl;
 
   for (const auto& entry : fs::directory_iterator(directory_path)) {
     if (entry.is_regular_file()) {
@@ -78,11 +83,15 @@ int main(int argc, char** argv) {
       //generator.generate(nombre_archivo, archivo2, problem, 2, 4);
       
       // Branch and bound con voraz
-      generator.generate(nombre_archivo, archivo4, problem, 4, 5);
+      //generator.generate(nombre_archivo, archivo4, problem, 4, 5);
+
+      // Branch and bound con GRASP
+      generator.generate(nombre_archivo, archivo5, problem, 5, 5);
     }  
   }
   //archivo.close();
   //archivo2.close();
   //archivo3.close();
-  archivo4.close();
+  //archivo4.close();
+  archivo5.close();
 }

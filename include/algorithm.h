@@ -74,12 +74,15 @@ class Algorithm {
 
     // Nodos activos a verificar por su límite superior y que podrían expandirse
     while (activeNodes_.size() > 0) {
+      //cout << RED << "Nodos activos: " << RESET << activeNodes_.size() << endl;
       sortByOption(activeNodes_);
       actual_Node = activeNodes_[activeNodes_.size() - 1];
 
       // Expando el nodo actual
       while (actual_Node.get_depth() < m) {
+        //cout << "Generando hojas..." << endl;
         vector<Node<Solution<T>>> newNodes = generateLeaf(problem, cota_inferior, actual_Node.get_depth(), m);
+        //cout << "Hojas generadas: " << newNodes.size() << endl;
         typename vector<Node<Solution<T>>>::iterator activeNodes_it = std::find(activeNodes_.begin(), activeNodes_.end(), actual_Node);
         activeNodes_.erase(activeNodes_it);
         sortByOption(newNodes);
@@ -94,7 +97,7 @@ class Algorithm {
 
       // Calculo z
       double actual_Node_z = actual_Node.get_solution().get_z(); // Revisar esto
-      if (actual_Node_z < cota_inferior.get_z()) {
+      if (actual_Node_z > cota_inferior.get_z()) {
         cota_inferior = actual_Node.get_solution();
       }
 

@@ -66,9 +66,11 @@ class GENERATOR {
         // Para cada m, ejecuto cada una de las estrategias
 
         for (int option = 0; option < 2; option++) {
+          //cout << "Estrategia: " << option << endl;
           algorithm.set_option(option);
           Solution<double> initial_solution = algorithm.run_local_search(problem, m, 1);
 
+          //cout << "Búsqueda local hecha" << endl;
           t0 = clock();
           solution = algorithm.run_branch_and_bound(problem, initial_solution, m);
           t1 = clock();
@@ -100,7 +102,41 @@ class GENERATOR {
         }
       }
       else if (type == 5) {
-        
+        for (int option = 0; option < 2; option++) {
+          algorithm.set_option(option);
+          // Tamaño LRC 3, 10 iteraciones con grasp
+          Iteracion mejor_iteracion_grasp = generar_mejor_iteracion(m, 3, 500, algorithm, problem, name);
+          Solution<double> initial_solution(mejor_iteracion_grasp.solution_, mejor_iteracion_grasp.z_);
+
+          t0 = clock();
+          solution = algorithm.run_branch_and_bound(problem, initial_solution, m);
+          t1 = clock();
+          
+          double time = (double(t1-t0)/CLOCKS_PER_SEC);
+          Iteracion iteracion;
+          iteracion.Identificador_ = name;
+          switch(option) {
+            case 0:
+              iteracion.estrategia_ = "SmallestZ";
+              break;
+            case 1:
+              iteracion.estrategia_ = "Deeper";
+              break;
+            default:
+              iteracion.estrategia_ = "Error";
+              break;
+          }
+          iteracion.n_ = problem.get_m(); // Number of points originally
+          iteracion.k_ = solution.get_k(); // Dimension of points
+          iteracion.m_ = solution.get_num_puntos(); // Number of points on solution
+          iteracion.ejecuciones_ = i + 1;
+          iteracion.z_ = solution.get_z();
+          iteracion.solution_ = solution.get_service_points();
+          iteracion.tiempo_ = time;
+          iteracion.nodos_ = algorithm.getNumberOfNodes();
+          iteraciones.push_back(iteracion);
+          sleep(0.2);
+        }
       }
       else {
         cout << "Error: Tipo de algoritmo no válido" << endl;
@@ -109,6 +145,7 @@ class GENERATOR {
       m++; // Aumentar el número de puntos en la solución
     }
     if (type == 1 || type == 3) guardar_voraz_csv(archivo, iteraciones);
+    else if (type == 4 || type == 5) guardar_bb(archivo, iteraciones);
   }
 
   /**
