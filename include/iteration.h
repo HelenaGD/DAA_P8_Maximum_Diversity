@@ -7,6 +7,7 @@ using namespace std;
 
 struct Iteracion {
   string Identificador_;
+  string estrategia_;
   int n_;
   int k_;
   int m_;
@@ -17,4 +18,5 @@ struct Iteracion {
   double z_;
   vector<vector<double>> solution_;
   double tiempo_;
+  int nodos_;
 };

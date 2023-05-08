@@ -19,7 +19,7 @@ class GENERATOR {
    * @param name Nombre del problema
    * @param archivo Archivo donde se escribirán los resultados
    * @param problem Problema a resolver
-   * @param type Tipo de algoritmo a ejecutar (1: Voraz, 2: GRASP, 3: Búsqueda local)
+   * @param type Tipo de algoritmo a ejecutar (1: Voraz, 2: GRASP, 3: Búsqueda local, 4: Branch and bound con voraz, 5: Branch and bound con grasp)
    * @param num_executions Número de ejecuciones a realizar
    * @return void
   */
@@ -62,6 +62,46 @@ class GENERATOR {
         iteraciones.push_back(iteracion);
         sleep(0.2);
       } else if (type == 2) iterar_grasp(m, algorithm, problem, archivo, name);
+      else if (type == 4) { // BB con voraz
+        // Para cada m, ejecuto cada una de las estrategias
+
+        for (int option = 0; option < 2; option++) {
+          algorithm.set_option(option);
+          Solution<double> initial_solution = algorithm.run_local_search(problem, m, 1);
+
+          t0 = clock();
+          solution = algorithm.run_branch_and_bound(problem, initial_solution, m);
+          t1 = clock();
+
+          double time = (double(t1-t0)/CLOCKS_PER_SEC);
+          Iteracion iteracion;
+          iteracion.Identificador_ = name;
+          switch(option) {
+            case 0:
+              iteracion.estrategia_ = "SmallestZ";
+              break;
+            case 1:
+              iteracion.estrategia_ = "Deeper";
+              break;
+            default:
+              iteracion.estrategia_ = "Error";
+              break;
+          }
+          iteracion.n_ = problem.get_m(); // Number of points originally
+          iteracion.k_ = solution.get_k(); // Dimension of points
+          iteracion.m_ = solution.get_num_puntos(); // Number of points on solution
+          iteracion.ejecuciones_ = i + 1;
+          iteracion.z_ = solution.get_z();
+          iteracion.solution_ = solution.get_service_points();
+          iteracion.tiempo_ = time;
+          iteracion.nodos_ = algorithm.getNumberOfNodes();
+          iteraciones.push_back(iteracion);
+          sleep(0.2);
+        }
+      }
+      else if (type == 5) {
+        
+      }
       else {
         cout << "Error: Tipo de algoritmo no válido" << endl;
         return;
@@ -69,7 +109,6 @@ class GENERATOR {
       m++; // Aumentar el número de puntos en la solución
     }
     if (type == 1 || type == 3) guardar_voraz_csv(archivo, iteraciones);
-    //else if (type == 2) guardar_grasp_csv(archivo, iteraciones);
   }
 
   /**
@@ -183,6 +222,21 @@ class GENERATOR {
               << iteracion.z_ << ","
               << to_string_solution(iteracion.solution_) << ","
               << iteracion.tiempo_ << endl;
+    }
+  }
+
+  void guardar_bb(ofstream& archivo, const vector<Iteracion>& iteraciones) {
+    // Escribir cada fila
+    for (auto iteracion : iteraciones) {
+      archivo << iteracion.Identificador_ << ","
+              << iteracion.estrategia_ << ","
+              << iteracion.n_ << ","
+              << iteracion.k_ << ","
+              << iteracion.m_ << ","
+              << iteracion.z_ << ","
+              << to_string_solution(iteracion.solution_) << ","
+              << iteracion.tiempo_ << ","
+              << iteracion.nodos_ << endl;
     }
   }
 

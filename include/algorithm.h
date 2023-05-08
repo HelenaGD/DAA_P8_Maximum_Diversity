@@ -33,21 +33,21 @@ class Algorithm {
    * @brief Establece la opción con la que se debe ejecutar el algoritmo
    * @param opcion Opción de algoritmo a ejecutar (0: SmallestZ, 1: Deeper)
   */
-  void setOption(int option) {
+  void set_option(int option) {
     option_ = option;
   }
 
   int getNumberOfNodes() const { return numberOfNodes_; }
 
-  bool sortByZ(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
+  static bool sortByZ(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
     return (node1.get_solution().get_z() < node2.get_solution().get_z());
   }
 
-  bool sortByDepth(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
+  static bool sortByDepth(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
     return (node1.get_depth() < node2.get_depth());
   }
 
-  std::vector<Node<Solution<T>>> sortbyOption(vector<Node<Solution<T>>>& activeNodes) {
+  std::vector<Node<Solution<T>>> sortByOption(vector<Node<Solution<T>>>& activeNodes) {
     if (option_ == 0) { // SmallestZ
       std::sort(activeNodes.begin(), activeNodes.end(), sortByZ);
     } else { // Deeper
@@ -64,7 +64,7 @@ class Algorithm {
   */
   Solution<T> run_branch_and_bound(const Problem<T>& problem, const Solution<T>& initial_solution, const int& m = 2) {
     // Tengo una solucion inicial que me llega de greedy o grasp
-    Solution<T> cota_inferior = initial_solution;
+    Solution<double> cota_inferior = initial_solution;
     Node<Solution<T>> initial_node(cota_inferior, 0);
 
     // Creo un conjunto de nodos activos a ser expandidos
@@ -82,7 +82,7 @@ class Algorithm {
         vector<Node<Solution<T>>> newNodes = generateLeaf(problem, cota_inferior, actual_Node.get_depth(), m);
         typename vector<Node<Solution<T>>>::iterator activeNodes_it = std::find(activeNodes_.begin(), activeNodes_.end(), actual_Node);
         activeNodes_.erase(activeNodes_it);
-        sortbyOption(newNodes);
+        sortByOption(newNodes);
         for (int i = 0; i < newNodes.size(); i++) {
           activeNodes_.push_back(newNodes[i]);
           numberOfNodes_++;
@@ -117,7 +117,6 @@ class Algorithm {
   std::vector<Node<Solution<T>>> generateLeaf(const Problem<T>& problem, const Solution<T>& parent, const int& depth, const int& m) {
     std::vector<Node<Solution<T>>> children;
     Solution<T> selectedElement;
-
     
     // Agrega a la posible solución los elementos correspondientes del padre debido a la profundidad actual.
     for (int i = 0; i < depth; i++) {
@@ -125,8 +124,8 @@ class Algorithm {
     }
 
     // Eliminar cada elemento de la solución generada que se encuentre dentro del conjunto inicial de elementos.
-    std::vector<vector<T>> initialX = problem.get_m();
-    for (int i = 0; i < selectedElement.size(); i++) {
+    std::vector<vector<T>> initialX = problem.get_points();
+    for (int i = 0; i < selectedElement.get_num_puntos(); i++) {
       typename Cluster::iterator initialXIterator = std::find(initialX.begin(), initialX.end(), selectedElement.get_service_points()[i]);
       initialX.erase(initialXIterator);
     }
@@ -144,15 +143,20 @@ class Algorithm {
     return children;
   }
 
+  /**
+   * Genera cada posible solución con las coordenadas restances y luego solo elige la solución
+   * que tenga el mejor valor de función objetivo
+  */
   Solution<T> generateBestSolution(const Cluster& initialX, const Solution<T>& selectedElement, const int& m) {
     std::pair<vector<T>, double> bestCandidate; // Cada posición corresponde a un elemento y su valor de z
     bestCandidate.second = 0.0;
     Solution<T> auxSolution;
     double candidate;
+    Solution<T> bestSolution = selectedElement;
 
-    while(selectedElement.size() < m) {
+    while(bestSolution.get_num_puntos() < m) {
       for (int i = 0; i < initialX.size(); i++) {
-        auxSolution = selectedElement;
+        auxSolution = bestSolution;
         auxSolution.add_element(initialX[i]);
         auxSolution.evaluate();
         candidate = auxSolution.get_z(); // revisar
@@ -161,10 +165,10 @@ class Algorithm {
           bestCandidate.second = candidate;
         }
       }
-      selectedElement.add_element(bestCandidate.first);
+      bestSolution.add_element(bestCandidate.first);
     }
-    selectedElement.evaluate();
-    return selectedElement;
+    bestSolution.evaluate();
+    return bestSolution;
   }
 
   /**

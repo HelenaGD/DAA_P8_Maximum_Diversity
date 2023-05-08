@@ -50,9 +50,14 @@ int main(int argc, char** argv) {
   //archivo3 << "Problema,n,K,m,z,S,CPU" << endl;
 
   // GRASP
-  ofstream archivo2("solutions/grasp.csv");
+  //ofstream archivo2("solutions/grasp.csv");
   // Escribir encabezado
-  archivo2 << "Problema,n,K,m,Iter,|LRC|,z0,z,S,CPU" << endl;
+  //archivo2 << "Problema,n,K,m,Iter,|LRC|,z0,z,S,CPU" << endl;
+
+  // Branch and bound
+  ofstream archivo4("solutions/bb_greedy.csv");
+  // Escribir encabezado
+  archivo4 << "Problema,Estrategia,n,K,m,z,S,CPU,nodos_generados" << endl;
 
   for (const auto& entry : fs::directory_iterator(directory_path)) {
     if (entry.is_regular_file()) {
@@ -70,10 +75,14 @@ int main(int argc, char** argv) {
       // Búsqueda local
       //generator.generate(nombre_archivo, archivo3, problem, 3, 4);
       // GRASP
-      generator.generate(nombre_archivo, archivo2, problem, 2, 4);
+      //generator.generate(nombre_archivo, archivo2, problem, 2, 4);
+      
+      // Branch and bound con voraz
+      generator.generate(nombre_archivo, archivo4, problem, 4, 5);
     }  
   }
   //archivo.close();
-  archivo2.close();
+  //archivo2.close();
   //archivo3.close();
+  archivo4.close();
 }

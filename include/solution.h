@@ -29,6 +29,7 @@ class Solution {
   double get_z() const { return sse_; }
   double get_z_constructivo() const { return sse_constructivo_; }
   int get_num_puntos() { return service_points_.size(); }
+  int get_num_puntos() const { return service_points_.size(); }
   int get_k() { return service_points_[0].size(); }
 
   Cluster get_service_points() const { return service_points_; }
@@ -121,10 +122,28 @@ class Solution {
     return *this;
   }
 
+  bool operator==(const Solution<T>& other) const {
+    if (sse_ != other.sse_) return false;
+    if (service_points_ != other.service_points_) return false;
+    if (sse_constructivo_ != other.sse_constructivo_) return false;
+    return true;
+  }
+
   vector<T>& operator[](int index) {
     if (index < 0 || index >= service_points_.size()) {
       throw out_of_range("Index out of range");
     }
     return service_points_[index];
+  }
+
+  vector<T> operator[](int index) const {
+    if (index < 0 || index >= service_points_.size()) {
+      throw out_of_range("Index out of range");
+    }
+    return service_points_[index];
+  }
+
+  void resize(int size) {
+    service_points_.resize(size);
   }
 };
