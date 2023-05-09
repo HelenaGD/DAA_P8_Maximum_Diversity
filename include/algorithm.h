@@ -39,16 +39,18 @@ class Algorithm {
 
   int getNumberOfNodes() const { return numberOfNodes_; }
 
+  // Modificación
   static bool sortByZ(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
-    return (node1.get_solution().get_z() < node2.get_solution().get_z());
+    return (node1.get_solution().get_z() > node2.get_solution().get_z()); // Mayor en lugar de menor
   }
 
+  // Modificación
   static bool sortByDepth(const Node<Solution<T>>& node1, const Node<Solution<T>>& node2) {
-    return (node1.get_depth() < node2.get_depth());
+    return (node1.get_depth() > node2.get_depth()); // Mayor en profundidad
   }
 
   std::vector<Node<Solution<T>>> sortByOption(vector<Node<Solution<T>>>& activeNodes) {
-    if (option_ == 0) { // SmallestZ
+    if (option_ == 0) { // SmallestZ. GreatterZ en la modificación
       std::sort(activeNodes.begin(), activeNodes.end(), sortByZ);
     } else { // Deeper
       std::sort(activeNodes.begin(), activeNodes.end(), sortByDepth);

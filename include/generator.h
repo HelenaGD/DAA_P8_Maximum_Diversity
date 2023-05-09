@@ -80,7 +80,8 @@ class GENERATOR {
           iteracion.Identificador_ = name;
           switch(option) {
             case 0:
-              iteracion.estrategia_ = "SmallestZ";
+              //iteracion.estrategia_ = "SmallestZ";
+              iteracion.estrategia_ = "GreatterZ";
               break;
             case 1:
               iteracion.estrategia_ = "Deeper";
@@ -105,7 +106,7 @@ class GENERATOR {
         for (int option = 0; option < 2; option++) {
           algorithm.set_option(option);
           // Tamaño LRC 3, 10 iteraciones con grasp
-          Iteracion mejor_iteracion_grasp = generar_mejor_iteracion(m, 3, 500, algorithm, problem, name);
+          Iteracion mejor_iteracion_grasp = generar_mejor_iteracion(m, 3, 10, algorithm, problem, name);
           Solution<double> initial_solution(mejor_iteracion_grasp.solution_, mejor_iteracion_grasp.z_);
 
           t0 = clock();
@@ -117,7 +118,8 @@ class GENERATOR {
           iteracion.Identificador_ = name;
           switch(option) {
             case 0:
-              iteracion.estrategia_ = "SmallestZ";
+              //iteracion.estrategia_ = "SmallestZ";
+              iteracion.estrategia_ = "GreatterZ";
               break;
             case 1:
               iteracion.estrategia_ = "Deeper";
